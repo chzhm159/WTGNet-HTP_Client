@@ -84,7 +84,7 @@ namespace WTGNet_Client.utils
                 // conn = new MySqlConnection(GetConnectString());    
             }catch (Exception ex) {
                 log.ErrorFormat("数据库链接失败: {0},{1},{2}",ex.Message,ex.StackTrace,GetConnectString());
-                AppEventBus.Inst().ShowMsg("数据库链接失败!,"+ex.Message);
+               
             }
            
         }

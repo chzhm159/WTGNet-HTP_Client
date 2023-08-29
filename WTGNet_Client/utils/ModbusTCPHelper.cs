@@ -22,7 +22,8 @@ namespace WTGNet_Client.utils
             modbusClient.SendDataChanged += new EasyModbus.ModbusClient.SendDataChangedHandler(UpdateSendData);
             modbusClient.ConnectedChanged += new EasyModbus.ModbusClient.ConnectedChangedHandler(UpdateConnectedChanged);
         }
-        public void Connect() {
+        public bool Connect() {
+            bool suc = false;
             try {
                 Init();
                 if (modbusClient.Connected)
@@ -32,28 +33,21 @@ namespace WTGNet_Client.utils
                 modbusClient.SerialPort = null;
                 modbusClient.Connect();
                 log.InfoFormat("链接成功");
-                //if (cbbSelctionModbus.SelectedIndex == 0) {
-
-
-
-                //    //modbusClient.receiveDataChanged += new EasyModbus.ModbusClient.ReceiveDataChanged(UpdateReceiveData);
-                //    //modbusClient.sendDataChanged += new EasyModbus.ModbusClient.SendDataChanged(UpdateSendData);
-                //    //modbusClient.connectedChanged += new EasyModbus.ModbusClient.ConnectedChanged(UpdateConnectedChanged);
-
-
-                //}
+                suc=true;
 
             } catch (Exception exc) {
+                suc = false;
                 log.InfoFormat("链接异常:{0},{1}",exc.Message,exc.StackTrace);
-                MessageBox.Show(exc.Message, "Unable to connect to Server", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                
             }
+            return suc;
         }
         string receiveData = null;
 
         void UpdateReceiveData(object sender) {
             receiveData = "Rx: " + BitConverter.ToString(modbusClient.receiveData).Replace("-", " ") + System.Environment.NewLine;
-            Thread thread = new Thread(updateReceiveTextBox);
-            thread.Start();
+            //Thread thread = new Thread(updateReceiveTextBox);
+            //thread.Start();
         }
         delegate void UpdateReceiveDataCallback();
         void updateReceiveTextBox() {
@@ -90,6 +84,20 @@ namespace WTGNet_Client.utils
                 //    txtConnectedStatus.Text = "Not Connected to Server";
                 //    txtConnectedStatus.BackColor = Color.Red;
             }
+        }
+
+        internal int[] Read(int idx, int num) {
+            int[] data = Array.Empty<int>();
+            try {
+                data = modbusClient.ReadHoldingRegisters(idx, num);
+
+            } catch(Exception exc) {
+                log.ErrorFormat("读取地址:[{0}],数量:[{1}] 异常:{2},{3}",idx,num,exc.Message
+                    ,exc.StackTrace);
+                data = Array.Empty<int>();
+            }
+            return data;
+            
         }
     }
 }
